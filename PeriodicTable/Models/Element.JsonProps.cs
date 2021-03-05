@@ -2,10 +2,11 @@ using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using Newtonsoft.Json;
 
-namespace PeriodicTableService
+namespace Periodic.Models
 {
-    public class Element
+    public sealed partial class Element
     {
+
         [JsonProperty("name")]
         public string Name { get; internal set; }
 
@@ -22,6 +23,7 @@ namespace PeriodicTableService
         public string Category { get; internal set; }
 
         [JsonProperty("color")]
+        [Obsolete("This property is currently always null")]
         public string Color { get; internal set; }
 
         [JsonProperty("density")]
@@ -40,10 +42,10 @@ namespace PeriodicTableService
         public string NamedBy { get; internal set; }
 
         [JsonProperty("number")]
-        public long Number { get; internal set; }
+        public int Number { get; internal set; }
 
         [JsonProperty("period")]
-        public long Period { get; internal set; }
+        public int Period { get; internal set; }
 
         [JsonProperty("phase")]
         public Phase Phase { get; internal set; }
@@ -61,13 +63,13 @@ namespace PeriodicTableService
         public string Symbol { get; internal set; }
 
         [JsonProperty("xpos")]
-        public long Xpos { get; internal set; }
+        public int Xpos { get; internal set; }
 
         [JsonProperty("ypos")]
-        public long Ypos { get; internal set; }
+        public int Ypos { get; internal set; }
 
         [JsonProperty("shells")]
-        public long[] Shells { get; internal set; }
+        public int[] Shells { get; internal set; }
 
         [JsonProperty("electron_configuration")]
         public string ElectronConfiguration { get; internal set; }

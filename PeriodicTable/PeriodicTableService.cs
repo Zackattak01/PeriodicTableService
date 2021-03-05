@@ -4,10 +4,11 @@ using System.Net.Http;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Periodic.Models;
 
-namespace PeriodicTableService
+namespace Periodic.Services
 {
-    public class PeriodicTableService
+    public sealed class PeriodicTableService
     {
         private const string JsonUrl = "https://raw.githubusercontent.com/Bowserinator/Periodic-Table-JSON/master/PeriodicTableJSON.json";
         private bool _downloadedData;
@@ -15,42 +16,43 @@ namespace PeriodicTableService
 
         private PeriodicTable _periodicTable { get; set; }
 
-        internal PeriodicTableService(HttpClient client)
+        public PeriodicTableService(HttpClient client)
         {
             _downloadedData = false;
             _client = client;
         }
 
-        public async Task FillCacheAsync()
+        public async Task<PeriodicTable> GetPeriodicTableAsync(bool createLookups = true)
         {
-            if (_downloadedData)
-                return;
-
-            var response = await _client.GetAsync(JsonUrl);
-            response.EnsureSuccessStatusCode();
-
-            var jsonString = await response.Content.ReadAsStringAsync();
-            _periodicTable = JsonConvert.DeserializeObject<PeriodicTable>(jsonString);
-        }
-
-        public PeriodicTable GetPeriodicTable()
-        {
-            ThrowIfNotDownloaded();
+            await EnsureFilledCacheAsync(createLookups);
 
             return _periodicTable;
         }
 
-        private void ThrowIfNotDownloaded()
+        private Task EnsureFilledCacheAsync(bool createLookups)
         {
             if (!_downloadedData)
-                throw new Exception("Periodic Table data not downloaded.  Try calling FillCacheAsync or use the Create method.");
+                return FillCacheAsync(createLookups);
+
+            return Task.CompletedTask;
         }
 
-        public static async Task<PeriodicTableService> Create(HttpClient client)
+        private async Task FillCacheAsync(bool createLookups)
         {
-            var service = new PeriodicTableService(client);
-            await service.FillCacheAsync();
-            return service;
+            var response = await _client.GetAsync(JsonUrl);
+            response.EnsureSuccessStatusCode();
+
+            var jsonString = await response.Content.ReadAsStringAsync();
+
+            if (createLookups)
+                _periodicTable = JsonConvert.DeserializeObject<IndexedPeriodicTable>(jsonString);
+            else
+                _periodicTable = JsonConvert.DeserializeObject<PeriodicTable>(jsonString);
+
+            if (_periodicTable is null)
+                throw new Exception("Periodic Table data could not be loaded");
+
+            _downloadedData = true;
         }
     }
 }

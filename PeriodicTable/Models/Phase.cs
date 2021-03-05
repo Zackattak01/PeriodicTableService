@@ -3,7 +3,7 @@ using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace PeriodicTableService
+namespace Periodic.Models
 {
     [JsonConverter(typeof(StringEnumConverter))]
     public enum Phase
